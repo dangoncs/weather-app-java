@@ -10,10 +10,10 @@ public class AppLauncher {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				//new WeatherAppGUI().setVisible(true);
+				new WeatherAppGUI().setVisible(true);
 				
-				//TEST API CALL
-				System.out.println(WeatherApp.getLocationData("Rio de Janeiro"));
+				//TEST DATE AND TIME FORMATTER
+				System.out.println(WeatherApp.getCurrentTime());
 			}
 		});
 	}
