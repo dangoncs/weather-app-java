@@ -2,8 +2,6 @@ package gui;
 
 import javax.swing.SwingUtilities;
 
-import backend.WeatherApp;
-
 public class AppLauncher {
 
 	public static void main(String[] args) {
@@ -13,7 +11,7 @@ public class AppLauncher {
 				new WeatherAppGUI().setVisible(true);
 				
 				//TEST DATE AND TIME FORMATTER
-				System.out.println(WeatherApp.getCurrentTime());
+				//System.out.println(WeatherApp.getCurrentTime());
 			}
 		});
 	}

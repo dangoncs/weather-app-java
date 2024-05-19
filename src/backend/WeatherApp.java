@@ -24,13 +24,13 @@ public class WeatherApp {
 		double longitude = (double) location.get("longitude");
 		
 		//API request with coordinates
-		String urlString = "https://api.open-meteo.com/v1/forecast?latitude=" + latitude + "&longitude=" + longitude + "&hourly=temperature_2m";
+		String urlString = "https://api.open-meteo.com/v1/forecast?latitude=" + latitude + "&longitude=" + longitude + "&hourly=temperature_2m,weather_code";
 		
 		try {
 			HttpURLConnection conn = fetchAPIResponse(urlString);
 			if(conn.getResponseCode() != 200) {
 				System.out.println("ERROR: could not connect to API");
-				System.out.println("RESPONSE CODE " + conn.getResponseCode() + conn.getResponseMessage());
+				System.out.println("RESPONSE CODE: " + conn.getResponseCode() + " " + conn.getResponseMessage());
 				return null;
 			}
 			
@@ -53,7 +53,20 @@ public class WeatherApp {
 			JSONArray time = (JSONArray) hourly.get("time");
 			int index = findIndexOfCurrentTime(time);
 			
-			return null;
+			JSONArray temperatureData = (JSONArray) hourly.get("temperature_2m");
+			double currentTemperature = (double) temperatureData.get(index);
+			
+			JSONArray weatherCode = (JSONArray) hourly.get("weather_code");
+			long currentWeatherCode = (long) weatherCode.get(index);
+			String currentWeatherCondition = convertWeatherCode(currentWeatherCode);
+			
+			JSONObject weatherData = new JSONObject();
+			weatherData.put("temperature", currentTemperature);
+			weatherData.put("weather_condition", currentWeatherCondition);
+			//weatherData.put("humidity", currentHumidity);
+			//weatherData.put("windspeed", windspeed);
+			
+			return weatherData;
 		}
 		catch(Exception e) {
 			e.printStackTrace();
@@ -69,7 +82,7 @@ public class WeatherApp {
 			HttpURLConnection conn = fetchAPIResponse(urlString);
 			if(conn.getResponseCode() != 200) {
 				System.out.println("ERROR: could not connect to API");
-				System.out.println("RESPONSE CODE " + conn.getResponseCode() + conn.getResponseMessage());
+				System.out.println("RESPONSE CODE: " + conn.getResponseCode() + " " + conn.getResponseMessage());
 				return null;
 			}
 			
@@ -113,14 +126,55 @@ public class WeatherApp {
 	
 	private static int findIndexOfCurrentTime(JSONArray timeList) {
 		String currentTime = getCurrentTime();
-		return 0;
+		
+		for(int i = 0; i < timeList.size(); i++) {
+			String time = (String) timeList.get(i);
+			if(time.equals(currentTime)) {
+				return i;
+			}
+		}
+		return -1;
 	}
 
-	//CHANGE TO PRIVATE LATER
-	public static String getCurrentTime() {
+	private static String getCurrentTime() {
 		LocalDateTime currentDateTime = LocalDateTime.now();
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH':00'");
 		String formattedDateTime = currentDateTime.format(formatter);
 		return formattedDateTime;
+	}
+	
+	private static String convertWeatherCode(long weatherCode) {
+		//switch(weatherCode)
+		
+		
+		if(weatherCode == 0L) {
+			return "Clear";
+		}
+		else if(weatherCode == 1L) {
+			return "Mostly Clear";
+		}
+		else if(weatherCode == 2L) {
+			return "Partly Cloudy";
+		}
+		else if(weatherCode == 3L) {
+			return "Overcast";
+		}
+		else if(weatherCode >= 45L && weatherCode <= 48L) {
+			return "Fog";
+		}
+		else if(weatherCode >= 51L && weatherCode <= 67L) {
+			return "Rain";
+		}
+		else if(weatherCode >= 71L && weatherCode <= 77L) {
+			return "Snow";
+		}
+		else if(weatherCode >= 80L && weatherCode <= 86L) {
+			return "Showers";
+		}
+		else if(weatherCode >= 95L && weatherCode <= 99L) {
+			return "Thunderstorms";
+		}
+		
+		return null;
 	}
 }
